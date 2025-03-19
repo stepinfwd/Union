@@ -2,10 +2,11 @@ function union (arr1, arr2) {
     if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
         throw new TypeError("Both arguments must be arrays.");
     }
-    const result = []
-    const seenPrimitives = new Set()
-    const seenObjects = []
+    const result = [];
+    const seenPrimitives = new Set(); // For primitive values
+    const seenObjects = []; // For objects and arrays
 
+    // Deep equality check
     function deepEqual (a, b) {
         // Handle NaN cases
         if (typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b)) {
@@ -45,34 +46,33 @@ function union (arr1, arr2) {
         return true;
     }
 
-    const isPrimitive = (val) => {
-        return val !== Object(val)
+    // Check if an object/array is already seen
+    function isObjectSeen (obj) {
+        return seenObjects.some((seenObj) => deepEqual(seenObj, obj));
     }
 
+    // Process an array
     function processArray (arr) {
-        for (item of arr) {
-            if (!isPrimitive(item)) {
-                const isSeenObject = seenObjects.some((val) => deepEqual(val, item))
-                if (!isSeenObject) {
-                    seenObjects.push(item)
-                    result.push(item)
+        for (const item of arr) {
+            if (typeof item === 'object' && item !== null) {
+                // Handle objects and arrays
+                if (!isObjectSeen(item)) {
+                    seenObjects.push(item);
+                    result.push(item);
                 }
-
-            }
-            else {
+            } else {
+                // Handle primitives
                 if (!seenPrimitives.has(item)) {
-                    seenPrimitives.add(item)
-                    result.push(item)
+                    seenPrimitives.add(item);
+                    result.push(item);
                 }
             }
         }
-
     }
 
-    processArray(arr1)
-    processArray(arr2)
+    // Process both arrays
+    processArray(arr1);
+    processArray(arr2);
 
-    return result
-
+    return result;
 }
-module.exports = union; 
